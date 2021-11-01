@@ -21,4 +21,4 @@ def fix_ticker_formatting(filename: str,
 
 
 if __name__ == '__main__':
-    fix_ticker_formatting('data_1.xlsx', 'data_4.xlsx', 'A')
+    pass
