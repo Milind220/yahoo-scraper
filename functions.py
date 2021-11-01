@@ -1,19 +1,24 @@
 import openpyxl
 
 
-def col_dots_not_dashes(filename: str,
-                    save_filename: str,
-                    column: str) -> None:
+def fix_ticker_formatting(filename: str,
+                          save_filename: str,
+                          column: str) -> None:
     workbook = openpyxl.load_workbook(filename=filename)
     ws = workbook.active # Opens the workbook.
-
     col = ws[column]
+
     for cell in col:
-        cell.value = '.'.join(cell.value.split('-'))
-        # This replaces the - in the ticker with a .
-    
+        ticker_data = cell.value.split('-')
+
+        len_diff: int = 4 - len(ticker_data[0])
+        ticker_data[0] = f'{"0"*len_diff}{ticker_data[0]}'
+        # This line adds 0's in front of ticker number if needed, to
+        # make sure that the length of the num is 4.
+        
+        cell.value = '.'.join(ticker_data) # Adding the . while joining them
     workbook.save(filename=save_filename)
 
 
 if __name__ == '__main__':
-    col_dots_not_dashes(filename='data_1.xlsx', save_filename='data_2.xlsx', column='A')
+    pass
