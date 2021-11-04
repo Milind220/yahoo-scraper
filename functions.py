@@ -54,11 +54,15 @@ def get_debt_shares(bal_url: str) -> Tuple[float, float, float, float]:
     # indexing to obtain the one that we need and then gets the text for it. 
     # Removes commas, and the resulting number in str form is converted to a 
     # float.
-    shares_20 = float(soup.select('div section span')[-3].text.replace(',','')) # 2020 shares
-    shares_19 = float(soup.select('div section span')[-2].text.replace(',','')) # 2019 shares
-    
-    debt_20 = float(soup.select('div section span')[-15].text.replace(',','')) # 2020 total debt
-    debt_19 = float(soup.select('div section span')[-14].text.replace(',','')) # 2019 total debt
+    try:
+        shares_20 = float(soup.select('div section span')[-3].text.replace(',','')) # 2020 shares
+        shares_19 = float(soup.select('div section span')[-2].text.replace(',','')) # 2019 shares
+        
+        debt_20 = float(soup.select('div section span')[-15].text.replace(',','')) # 2020 total debt
+        debt_19 = float(soup.select('div section span')[-14].text.replace(',','')) # 2019 total debt
+    except Exception as err:
+        logging.error(f'Scraping error: {err}\n url: {bal_url}')
+        return (-1.0, -1.0, -1.0, -1.0)
 
     return (shares_20, shares_19, debt_20, debt_19)
 
@@ -74,8 +78,13 @@ def get_hist_price(price_url: str) -> Tuple[float, float]:
     # Gets a list of bs4 tags that have element td in them, and then selects 
     # the one that that we need with list indexing, gets its text, and
     # converts it to a float.
-    price_new = float(soup.find_all('td')[4].text)
-    price_old = float(soup.find_all('td')[92].text)
+    try:
+        price_new = float(soup.find_all('td')[4].text)
+        price_old = float(soup.find_all('td')[92].text)
+    except Exception as err:
+        logging.error(f'Scraping error: {err}\n url: {price_url}')
+        return (-1.0, -1.0)
+
     return (price_new, price_old)
 
 
@@ -91,11 +100,15 @@ def get_revenue_ebit(inc_url: str) -> Tuple[float, float, float, float]:
     # indexing to obtain the one that we need and then gets the text for it. 
     # Removes commas, and the resulting number in str form is converted to a 
     # float.
-    rev_20 = float(soup.select('div section span')[-160].text.replace(',',''))
-    rev_19 = float(soup.select('div section span')[-161].text.replace(',',''))
-    
-    ebit_20 = float(soup.select('div section span')[-53].text.replace(',',''))
-    ebit_19 = float(soup.select('div section span')[-52].text.replace(',',''))
+    try:
+        rev_20 = float(soup.select('div section span')[-160].text.replace(',',''))
+        rev_19 = float(soup.select('div section span')[-161].text.replace(',',''))
+        
+        ebit_20 = float(soup.select('div section span')[-53].text.replace(',',''))
+        ebit_19 = float(soup.select('div section span')[-52].text.replace(',',''))
+    except Exception as err:
+        logging.error(f'Scraping error: {err}\n url: {inc_url}')
+        return (-1.0, -1.0, -1.0, -1.0)
     
     return (rev_20, rev_19, ebit_20, ebit_19)
     
