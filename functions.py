@@ -75,7 +75,7 @@ def get_hist_price(price_url: str) -> Tuple[float, float]:
     # the one that that we need with list indexing, gets its text, and
     # converts it to a float.
     price_new = float(soup.find_all('td')[4].text)
-    price_old = float(soup.find_all('td')[88].text)
+    price_old = float(soup.find_all('td')[92].text)
     return (price_new, price_old)
 
 
