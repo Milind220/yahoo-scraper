@@ -100,5 +100,18 @@ def get_revenue_ebit(inc_url: str) -> Tuple[float, float, float, float]:
     return (rev_20, rev_19, ebit_20, ebit_19)
     
 
+def get_urls(ticker: str) -> Tuple[str, str, str]: 
+    # Historical price is sourced from here.
+    hist_price_url = f'https://finance.yahoo.com/quote/{ticker}/history?period1=1478131200&period2=1609372800&interval=1mo&filter=history&frequency=1mo&includeAdjustedClose=true'
+
+    # debt and share number sourced from here.
+    bal_sheet_url = f'https://finance.yahoo.com/quote/{ticker}/balance-sheet?p={ticker}'
+
+    # All other metrics sourced from here.
+    inc_stmt_url = f'https://finance.yahoo.com/quote/{ticker}/financials?p={ticker}'
+    
+    return (hist_price_url, bal_sheet_url, inc_stmt_url)
+
+
 if __name__ == '__main__':
     pass
