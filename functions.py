@@ -1,9 +1,11 @@
 import openpyxl
 import requests
 import bs4
-import logging
-import pandas as pd
 import numpy as np
+import pandas as pd
+import logging
+import lxml
+from lxml import html
 from typing import Dict, Tuple
 
 
@@ -51,58 +53,35 @@ def get_debt_shares(bal_url: str, ticker: str) -> Tuple[float, float, float, flo
         logging.error(f'Status code error:{r.status_code}\n{bal_url}\n')
         return (-1.0, -1.0, -1.0, -1.0)
     soup = bs4.BeautifulSoup(r.text, 'lxml')
-    
-    # Gets a list of bs4 tags that have these elements in them, then uses list
-    # indexing to obtain the one that we need and then gets the text for it. 
-    # Removes commas, and the resulting number in str form is converted to a 
-    # float.
+
     shares_20, shares_19, debt_20, debt_19 = -1.0, -1.0, -1.0, -1.0
+    # In the event of an error, if a value is not assigned, a -1.0 value would
+    # let me see this in the dataframe. I can later replace this with nan.
     try:
-        shares_20 = float(soup.select('div section span')[-3].text.replace(',','')) # 2020 shares
+        shares_20 = float(soup.select('div section span')[-4].text.replace(',','')) # 2020 shares
     except Exception as err:
         logging.error(f'Scraping error: shares20\n {err}\n url: {bal_url}\n ticker: {ticker}')
     
     try:
-        shares_19 = float(soup.select('div section span')[-2].text.replace(',','')) # 2019 shares
+        shares_19 = float(soup.select('div section span')[-3].text.replace(',','')) # 2019 shares
     except Exception as err:
         logging.error(f'Scraping error: shares19\n {err}\n url: {bal_url}\n ticker: {ticker}')
     
     try:
-        debt_20 = float(soup.select('div section span')[-15].text.replace(',','')) # 2020 total debt
+        for i,tag in enumerate(soup.select('div section span')):
+            if tag.text == 'Total Debt':
+                debt_20 = float(soup.select('div section span')[i+1].text.replace(',',''))
     except Exception as err:
         logging.error(f'Scraping error: debt20\n {err}\n url: {bal_url}\n ticker: {ticker}')
     
     try:
-        debt_19 = float(soup.select('div section span')[-14].text.replace(',','')) # 2019 total debt
+        for i,tag in enumerate(soup.select('div section span')):
+            if tag.text == 'Total Debt':
+                debt_19 = float(soup.select('div section span')[i+2].text.replace(',',''))
     except Exception as err:
         logging.error(f'Scraping error: debt19\n {err}\n url: {bal_url}\n ticker: {ticker}')
 
     return (shares_20, shares_19, debt_20, debt_19)
-
-
-def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float]:
-    
-    r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
-    if r.status_code != 200: # 200 is successful request.
-        logging.error(f'Status code error:{r.status_code}\n{price_url}\n')
-        return (-1.0, -1.0)
-    soup = bs4.BeautifulSoup(r.text, 'lxml')
-
-    # Gets a list of bs4 tags that have element td in them, and then selects 
-    # the one that that we need with list indexing, gets its text, and
-    # converts it to a float.
-    price20, price19 = -1.0, -1.0
-    try:
-        price20 = float(soup.find_all('td')[4].text)
-    except Exception as err:
-        logging.error(f'Scraping error: price20\n {err}\n url: {price_url}\n ticker: {ticker}')
-
-    try:
-        price19 = float(soup.find_all('td')[92].text)
-    except Exception as err:
-        logging.error(f'Scraping error: price19\n {err}\n url: {price_url}\n ticker: {ticker}')
-
-    return (price20, price19)
 
 
 def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, float]:
@@ -118,25 +97,35 @@ def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, fl
     # Removes commas, and the resulting number in str form is converted to a 
     # float.
     rev20, rev19, ebit20, ebit19 = -1.0, -1.0, -1.0, -1.0
-    try:
-        rev20 = float(soup.select('div section span')[-160].text.replace(',',''))
-    except Exception as err:
-        logging.error(f'Scraping error: rev20\n {err}\n url: {inc_url}\n ticker: {ticker}')
+    index = 0 
+    for i,tag in enumerate(soup.select('div section span')):
+        if tag.text == 'Breakdown':
+            index = i
+        if '2020' in tag.text:
+            offset20 = i - index
+        if '2019' in tag.text:
+            offset19 = i - index
+    
+        if tag.text == 'Total Revenue':
+            try:
+                rev20 = float(soup.select('div section span')[i+offset20].text.replace(',',''))
+            except Exception as err:
+                logging.error(f'Scraping error: rev20\n {err}\n url: {inc_url}\n ticker: {ticker}')
+            try:
+                rev19 = float(soup.select('div section span')[i+offset19].text.replace(',',''))
+            except Exception as err:
+                logging.error(f'Scraping error: rev19\n {err}\n url: {inc_url}\n ticker: {ticker}')
 
-    try:
-        rev19 = float(soup.select('div section span')[-161].text.replace(',',''))
-    except Exception as err:
-        logging.error(f'Scraping error: rev19\n {err}\n url: {inc_url}\n ticker: {ticker}')
+        if tag.text == 'EBIT':
+            try:
+                ebit20 = float(soup.select('div section span')[i+offset20].text.replace(',',''))
+            except Exception as err:
+                logging.error(f'Scraping error:  ebit20\n{err}\n url: {inc_url}\n ticker: {ticker}')
 
-    try:
-        ebit20 = float(soup.select('div section span')[-53].text.replace(',',''))
-    except Exception as err:
-        logging.error(f'Scraping error:  ebit20\n{err}\n url: {inc_url}\n ticker: {ticker}')
-
-    try:
-        ebit19 = float(soup.select('div section span')[-52].text.replace(',',''))
-    except Exception as err:
-        logging.error(f'Scraping error: ebit19\n{err}\n url: {inc_url}\n ticker: {ticker}')
+            try:
+                ebit19 = float(soup.select('div section span')[i+offset19].text.replace(',',''))
+            except Exception as err:
+                logging.error(f'Scraping error: ebit19\n{err}\n url: {inc_url}\n ticker: {ticker}')
     
     return (rev20, rev19, ebit20, ebit19)
     
@@ -153,6 +142,36 @@ def get_urls(ticker: str) -> Tuple[str, str, str]:
     
     return (hist_price_url, bal_sheet_url, inc_stmt_url)
 
+
+def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float]:
+    
+    r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
+    if r.status_code != 200: # 200 is successful request.
+        logging.error(f'Status code error:{r.status_code}\n{price_url}\n')
+        return (-1.0, -1.0)
+
+    element_html = lxml.html.fromstring(r.content)
+    table = element_html.xpath('//table')
+    table_tree = lxml.etree.tostring(table[0], method='xml')
+    data = pd.read_html(table_tree)[0]
+    data1 = data[pd.to_numeric(data['Open'], errors='coerce').notnull()] 
+    data1.set_axis(list(range(len(data1))), inplace=True)
+
+    # Gets a list of bs4 tags that have element td in them, and then selects 
+    # the one that that we need with list indexing, gets its text, and
+    # converts it to a float.
+    price20, price19 = -1.0, -1.0
+    try:
+        price20 = float(data1.loc[0,'Close*'])
+    except Exception as err:
+        logging.error(f'Scraping error: price20\n {err}\n url: {price_url}\n ticker: {ticker}')
+
+    try:
+        price19 = float(data1.loc[12,'Close*'])
+    except Exception as err:
+        logging.error(f'Scraping error: price19\n {err}\n url: {price_url}\n ticker: {ticker}')
+
+    return (price20, price19)
 
 if __name__ == '__main__':
     pass
