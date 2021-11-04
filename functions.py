@@ -1,4 +1,7 @@
 import openpyxl
+import requests
+import bs4
+import logging
 from typing import Dict, Tuple
 
 
@@ -17,7 +20,11 @@ def fix_ticker_formatting(filename: str,
         # This line adds 0's in front of ticker number if needed, to
         # make sure that the length of the num is 4.
         
-        cell.value = '.'.join(ticker_data) # Adding the . while joining them
+        # The tickers in our file contained dashes instead of dots. 
+        # (example: 123-HK). However, on Yahoo finance, the urls use the
+        # tickers with . instead of - and this line adds the . back in, as the
+        # - has already been removed.
+        cell.value = '.'.join(ticker_data) 
     workbook.save(filename=save_filename)
 
 
@@ -34,6 +41,64 @@ def get_headers() -> Dict[str, str]:
     "upgrade-insecure-requests": "1",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"}
 
+
+def get_debt_shares(bal_url: str) -> Tuple[float, float, float, float]:
+
+    r = requests.get(bal_url, verify=True, headers=get_headers(), timeout=30)
+    if r.status_code != 200: # 200 is successful request.
+        logging.error(f'Status code error:{r.status_code}\n{bal_url}\n')
+        return (-1.0, -1.0, -1.0, -1.0)
+    soup = bs4.BeautifulSoup(r.text, 'lxml')
+    
+    # Gets a list of bs4 tags that have these elements in them, then uses list
+    # indexing to obtain the one that we need and then gets the text for it. 
+    # Removes commas, and the resulting number in str form is converted to a 
+    # float.
+    shares_20 = float(soup.select('div section span')[-3].text.replace(',','')) # 2020 shares
+    shares_19 = float(soup.select('div section span')[-2].text.replace(',','')) # 2019 shares
+    
+    debt_20 = float(soup.select('div section span')[-15].text.replace(',','')) # 2020 total debt
+    debt_19 = float(soup.select('div section span')[-14].text.replace(',','')) # 2019 total debt
+
+    return (shares_20, shares_19, debt_20, debt_19)
+
+
+def get_hist_price(price_url: str) -> Tuple[float, float]:
+    
+    r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
+    if r.status_code != 200: # 200 is successful request.
+        logging.error(f'Status code error:{r.status_code}\n{price_url}\n')
+        return (-1.0, -1.0)
+    soup = bs4.BeautifulSoup(r.text, 'lxml')
+
+    # Gets a list of bs4 tags that have element td in them, and then selects 
+    # the one that that we need with list indexing, gets its text, and
+    # converts it to a float.
+    price_new = float(soup.find_all('td')[4].text)
+    price_old = float(soup.find_all('td')[88].text)
+    return (price_new, price_old)
+
+
+def get_revenue_ebit(inc_url: str) -> Tuple[float, float, float, float]:
+
+    r = requests.get(inc_url, verify=True, headers=get_headers(), timeout=30)
+    if r.status_code != 200: # 200 is successful request.
+        logging.error(f'Status code error:{r.status_code}\n{inc_url}\n')
+        return (-1.0, -1.0, -1.0, -1.0)
+    soup = bs4.BeautifulSoup(r.text, 'lxml')
+
+    # Gets a list of bs4 tags that have these elements in them, then uses list
+    # indexing to obtain the one that we need and then gets the text for it. 
+    # Removes commas, and the resulting number in str form is converted to a 
+    # float.
+    rev_20 = float(soup.select('div section span')[-160].text.replace(',',''))
+    rev_19 = float(soup.select('div section span')[-161].text.replace(',',''))
+    
+    ebit_20 = float(soup.select('div section span')[-53].text.replace(',',''))
+    ebit_19 = float(soup.select('div section span')[-52].text.replace(',',''))
+    
+    return (rev_20, rev_19, ebit_20, ebit_19)
+    
 
 if __name__ == '__main__':
     pass
