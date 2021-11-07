@@ -43,6 +43,9 @@ def main() -> None:
         work_df.loc[i, 'EBIT 2020'] = ebit20
         work_df.loc[i, 'EBIT 2019'] = ebit19
 
+    # Export scraped data to Excel file.
+    work_df.replace(to_replace = -1, value = np.nan)
+    work_df.to_excel('output_data.xlsx')
 
 if __name__ == '__main__':
     main()
