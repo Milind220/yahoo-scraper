@@ -11,7 +11,8 @@ from typing import Dict, Tuple
 
 def fix_ticker_formatting(filename: str,
                           save_filename: str,
-                          column: str) -> None:
+                          column: str,
+                          ) -> None:
     workbook = openpyxl.load_workbook(filename=filename)
     ws = workbook.active # Opens the workbook.
     col = ws[column]
@@ -48,7 +49,9 @@ def get_headers() -> Dict[str, str]:
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"}
 
 
-def get_debt_shares(bal_url: str, ticker: str) -> Tuple[float, float, float, float]:
+def get_debt_shares(bal_url: str,
+                    ticker: str,
+                    ) -> Tuple[float, float, float, float]:
 
     r = requests.get(bal_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
@@ -86,7 +89,9 @@ def get_debt_shares(bal_url: str, ticker: str) -> Tuple[float, float, float, flo
     return (shares_20, shares_19, debt_20, debt_19)
 
 
-def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, float]:
+def get_revenue_ebit(inc_url: str,
+                     ticker: str,
+                     ) -> Tuple[float, float, float, float]:
 
     r = requests.get(inc_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
@@ -145,7 +150,9 @@ def get_urls(ticker: str) -> Tuple[str, str, str]:
     return (hist_price_url, bal_sheet_url, inc_stmt_url)
 
 
-def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float]:
+def get_hist_price(price_url: str,
+                   ticker: str,
+                   ) -> Tuple[float, float]:
     
     r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
@@ -164,12 +171,12 @@ def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float]:
     # converts it to a float.
     price20, price19 = -1.0, -1.0
     try:
-        price20 = float(data1.loc[0,'Close*'])
+        price20 = float(data1.loc[0, 'Close*'])
     except Exception as err:
         logging.error(f'Scraping error: price20\n {err}\n url: {price_url}\n ticker: {ticker}')
 
     try:
-        price19 = float(data1.loc[12,'Close*'])
+        price19 = float(data1.loc[12, 'Close*'])
     except Exception as err:
         logging.error(f'Scraping error: price19\n {err}\n url: {price_url}\n ticker: {ticker}')
 
