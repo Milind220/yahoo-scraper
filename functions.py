@@ -17,6 +17,8 @@ def fix_ticker_formatting(filename: str,
     col = ws[column]
 
     for cell in col:
+        if cell.value == '\\':
+            cell.value = 'Ticker'
         ticker_data = cell.value.split('-')
 
         len_diff: int = 4 - len(ticker_data[0])
@@ -172,6 +174,7 @@ def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float]:
         logging.error(f'Scraping error: price19\n {err}\n url: {price_url}\n ticker: {ticker}')
 
     return (price20, price19)
+
 
 if __name__ == '__main__':
     pass
