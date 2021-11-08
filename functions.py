@@ -200,7 +200,7 @@ def configure_logs() -> None:
         format = '%(asctime)s - %(message)s',
         level = logging.ERROR)
 
-    print('Status: Logs configured.\n')
+    print('\n\nStatus: Logs configured.\n')
 
 
 if __name__ == '__main__':
