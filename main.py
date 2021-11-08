@@ -24,7 +24,7 @@ def main() -> None:
     print('Status: Starting webscrape.\n')
     for i in range(len(work_df)):
         ticker: str = work_df['Ticker'][i]
-        print(f'\tStatus: #{i} Currently scraping data: {ticker}\n')
+        print(f'\tStatus: #{i+1} Currently scraping data: {ticker}\n')
 
         # Getting the url's for a ticker.
         price_url, bal_url, inc_url = functions.get_urls(ticker)
