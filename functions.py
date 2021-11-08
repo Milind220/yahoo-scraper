@@ -12,7 +12,7 @@ import time
 
 
 # TODO: Add docstrings to all funcs.
-# TODO: write explicit main in script, stop using jupyter notebook.
+# TODO: Fix error messages in get_hist_price.
 
 
 def fix_ticker_formatting(filename: str,

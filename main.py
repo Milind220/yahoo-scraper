@@ -16,7 +16,7 @@ def main() -> None:
         save_filename = 'ready_input_data.xlsx',
         column = 'A')
 
-    data_file: str = 'data_3-2.xlsx' # Formatted table.
+    data_file: str = 'ready_input_data' # Formatted table.
     input_df = pd.read_excel(data_file)
 
     work_df = input_df.copy() # To avoid working with original df.
