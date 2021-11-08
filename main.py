@@ -36,8 +36,8 @@ def main() -> None:
         rev20, rev19, ebit20, ebit19 = functions.get_revenue_ebit(inc_url, ticker)
         
         # Entering data into dataframe.
-        work_df.loc[i, 'Stock Price 2020'] = price20
-        work_df.loc[i, 'Stock Price 2019'] = price19
+        work_df.loc[i, 'Price 2020'] = price20
+        work_df.loc[i, 'Price 2019'] = price19
         work_df.loc[i, 'Revenue 2020'] = rev20
         work_df.loc[i, 'Revenue 2019'] = rev19
         work_df.loc[i, 'Share Number 2020'] = shares20
@@ -46,7 +46,7 @@ def main() -> None:
         work_df.loc[i, 'Debt 2019'] = debt19
         work_df.loc[i, 'EBIT 2020'] = ebit20
         work_df.loc[i, 'EBIT 2019'] = ebit19
-
+        
     # Export scraped data to Excel file.
     work_df.replace(to_replace = -1, value = np.nan)
     work_df.to_excel('output_data.xlsx')
