@@ -36,21 +36,24 @@ def fix_ticker_formatting(filename: str,
         # tickers with . instead of - and this line adds the . back in, as the
         # - has already been removed.
         cell.value = '.'.join(ticker_data) 
-    workbook.save(filename=save_filename)
+    workbook.save(filename = save_filename)
+    print('Status: Ticker formatting fixed.\n')
 
 
 def get_headers() -> Dict[str, str]:
-    return {"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "accept-encoding": "gzip, deflate, br",
-    "accept-language": "en-GB,en;q=0.9,en-US;q=0.8,ml;q=0.7",
-    "cache-control": "max-age=0",
-    "dnt": "1",
-    "sec-fetch-dest": "document",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-site": "none",
-    "sec-fetch-user": "?1",
-    "upgrade-insecure-requests": "1",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"}
+    return {
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-GB,en;q=0.9,en-US;q=0.8,ml;q=0.7",
+        "cache-control": "max-age=0",
+        "dnt": "1",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
+        }
 
 
 def get_debt_shares(bal_url: str,
@@ -61,6 +64,7 @@ def get_debt_shares(bal_url: str,
     if r.status_code != 200: # 200 is successful request.
         logging.error(f'Status code error:{r.status_code}\n{bal_url}\n')
         return (-1.0, -1.0, -1.0, -1.0)
+        
     soup = bs4.BeautifulSoup(r.text, 'lxml')
 
     shares_20, shares_19, debt_20, debt_19 = -1.0, -1.0, -1.0, -1.0
@@ -195,6 +199,8 @@ def configure_logs() -> None:
     logging.basicConfig(
         format = '%(asctime)s - %(message)s',
         level = logging.ERROR)
+
+    print('Status: Logs configured.\n')
 
 
 if __name__ == '__main__':

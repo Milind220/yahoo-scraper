@@ -8,21 +8,24 @@ import pandas as pd
 
 def main() -> None:
     # Enable logging.
-    functions.configure_logs()    
+    functions.configure_logs()
 
     # Correctly format the skeleton Excel table before use.
-    functions.fix_ticker_formatting(filename = 'original_data.xlsx',
-                                    save_filename = 'ready_input_data.xlsx',
-                                    column = 'A') 
+    functions.fix_ticker_formatting(
+        filename = 'original_data.xlsx',
+        save_filename = 'ready_input_data.xlsx',
+        column = 'A') 
 
-    data_file: str = 'ready_input_data.xlsx'
+    data_file: str = 'ready_input_data.xlsx' # Formatted table.
     input_df = pd.read_excel(data_file)
 
-    work_df = input_df.copy()
+    work_df = input_df.copy() # To avoid working with original df.
 
+    print('Status: Starting webscrape.\n')
     for i in range(len(work_df)):
         ticker: str = work_df['Ticker'][i]
-        
+        print(f'\tStatus: Currently scraping data: {ticker}\n')
+
         # Getting the url's for a ticker.
         price_url, bal_url, inc_url = functions.get_urls(ticker)
         
@@ -46,6 +49,8 @@ def main() -> None:
     # Export scraped data to Excel file.
     work_df.replace(to_replace = -1, value = np.nan)
     work_df.to_excel('output_data.xlsx')
+    print('Status: Data exported!\nAll done!')
+
 
 if __name__ == '__main__':
     main()
