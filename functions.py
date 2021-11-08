@@ -162,12 +162,12 @@ def get_urls(ticker: str) -> Tuple[str, str, str]:
 
 def get_hist_price(price_url: str,
                    ticker: str,
-                   ) -> Tuple[float, float]:
+                   ) -> Tuple[float, float, float, float]:
     
     r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
         logging.error(f'Status code error:{r.status_code}\n{price_url}\n')
-        return (-1.0, -1.0)
+        return (-1.0, -1.0, -1.0, -1.0)
 
     element_html = lxml.html.fromstring(r.content)
     table = element_html.xpath('//table')
@@ -179,9 +179,10 @@ def get_hist_price(price_url: str,
     # Gets a list of bs4 tags that have element td in them, and then selects 
     # the one that that we need with list indexing, gets its text, and
     # converts it to a float.
-    price20, price19 = -1.0, -1.0
+    price20, price19, price18, price17 = -1.0, -1.0, -1.0, -1.0
     try:
         price20 = float(data1.loc[0, 'Close*'])
+
     except Exception as err:
         logging.error(f'Scraping error: price20\n {err}\n url: {price_url}\n ticker: {ticker}')
 
@@ -190,7 +191,17 @@ def get_hist_price(price_url: str,
     except Exception as err:
         logging.error(f'Scraping error: price19\n {err}\n url: {price_url}\n ticker: {ticker}')
 
-    return (price20, price19)
+    try:
+        price18 = float(data1.loc[24, 'Close*'])
+    except Exception as err:
+        logging.error(f'Scraping error: price18\n {err}\n url: {price_url}\n ticker: {ticker}')
+    
+    try:
+        price17 = float(data1.loc[36, 'Close*'])
+    except Exception as err:
+        logging.error(f'Scraping error: price17\n {err}\n url: {price_url}\n ticker: {ticker}')
+
+    return (price20, price19, price18, price17)
 
 
 def configure_logs() -> None:
