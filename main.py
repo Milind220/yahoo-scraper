@@ -52,8 +52,13 @@ def main() -> None:
         work_df.loc[i, 'EBIT 2019'] = ebit19
         
     # Export scraped data to Excel file.
+
     work_df.replace(to_replace = -1, value = np.nan)
-    work_df.to_excel('output_data.xlsx')
+    _file_name: str = str(input('\nWhat filename to save as?'
+                          '\n1. Use a unique filename!'
+                          '\n2. Don\'t provide a file extension'
+                          '\nEnter here: '))
+    work_df.to_excel(f'{_file_name}.xlsx')
     print('Status: Data exported!\nAll done!')
 
 
