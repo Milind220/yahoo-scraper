@@ -33,11 +33,11 @@ def main() -> None:
         
         # Getting the data for a ticker.
         price20, price19 = functions.get_hist_price(price_url, ticker)
-        time.sleep(3)
+        functions.generate_rand_delay()
         shares20, shares19, debt20, debt19 = functions.get_debt_shares(bal_url, ticker)
-        time.sleep(3)
+        functions.generate_rand_delay()
         rev20, rev19, ebit20, ebit19 = functions.get_revenue_ebit(inc_url, ticker)
-        time.sleep(5)
+        functions.generate_rand_delay()
         
         # Entering data into dataframe.
         work_df.loc[i, 'Price 2020'] = price20

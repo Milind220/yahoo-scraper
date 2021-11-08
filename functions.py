@@ -1,4 +1,5 @@
 import openpyxl
+import random
 import requests
 import bs4
 import numpy as np
@@ -7,6 +8,7 @@ import logging
 import lxml
 from lxml import html
 from typing import Dict, Tuple
+import time
 
 
 # TODO: Add docstrings to all funcs.
@@ -201,6 +203,12 @@ def configure_logs() -> None:
         level = logging.ERROR)
 
     print('\n\nStatus: Logs configured.\n')
+
+
+def generate_rand_delay(upper: int = 10,
+                        lower: int = 4
+                        ) -> None:
+    time.sleep(random.randint(lower, upper))
 
 
 if __name__ == '__main__':
