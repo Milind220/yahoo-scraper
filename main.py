@@ -24,7 +24,7 @@ def main() -> None:
     print('Status: Starting webscrape.\n')
     for i in range(len(work_df)):
         ticker: str = work_df['Ticker'][i]
-        print(f'\tStatus: Currently scraping data: {ticker}\n')
+        print(f'\tStatus: #{i} Currently scraping data: {ticker}\n')
 
         # Getting the url's for a ticker.
         price_url, bal_url, inc_url = functions.get_urls(ticker)
@@ -35,8 +35,8 @@ def main() -> None:
         rev20, rev19, ebit20, ebit19 = functions.get_revenue_ebit(inc_url, ticker)
         
         # Entering data into dataframe.
-        work_df.loc[i, 'Price 2020'] = price20
-        work_df.loc[i, 'Price 2019'] = price19
+        work_df.loc[i, 'Stock Price 2020'] = price20
+        work_df.loc[i, 'Stock Price 2019'] = price19
         work_df.loc[i, 'Revenue 2020'] = rev20
         work_df.loc[i, 'Revenue 2019'] = rev19
         work_df.loc[i, 'Share Number 2020'] = shares20
