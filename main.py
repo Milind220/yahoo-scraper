@@ -1,9 +1,10 @@
 """Main scraper script to run"""
 
 
-import functions
 import numpy as np
 import pandas as pd
+
+import functions
 
 
 def main() -> None:

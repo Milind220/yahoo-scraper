@@ -1,24 +1,34 @@
-import openpyxl
-import random
-import requests
-import bs4
-import numpy as np
-import pandas as pd
+""""""
+
+
 import logging
+import random
+import time
+from typing import Dict, Tuple
+
+import bs4
+import openpyxl
 import lxml
 from lxml import html
-from typing import Dict, Tuple
-import time
+import numpy as np
+import pandas as pd
+import requests
 
 
-# TODO: Add docstrings to all funcs.
 # TODO: Fix error messages in get_hist_price.
+# TODO: Improve logging
 
 
 def fix_ticker_formatting(filename: str,
                           save_filename: str,
-                          column: str,
-                          ) -> None:
+                          column: str) -> None:
+    """[summary]
+
+    Args:
+        filename (str): [description]
+        save_filename (str): [description]
+        column (str): [description]
+    """
     workbook = openpyxl.load_workbook(filename=filename)
     ws = workbook.active # Opens the workbook.
     col = ws[column]
@@ -34,17 +44,23 @@ def fix_ticker_formatting(filename: str,
         # make sure that the length of the num is 4.
         
         # The tickers in our file contained dashes instead of dots. 
-        # (example: 123-HK). However, on Yahoo finance, the urls use the
-        # tickers with . instead of - and this line adds the . back in, as the
-        # - has already been removed.
+        # (example: 123-HK). However, on Yahoo finance, the urls use
+        # the tickers with . instead of - and this line adds the . 
+        # back in, as the - has already been removed.
         cell.value = '.'.join(ticker_data) 
     workbook.save(filename = save_filename)
     print('Status: Ticker formatting fixed.\n')
 
 
 def get_headers() -> Dict[str, str]:
+    """[summary]
+
+    Returns:
+        Dict[str, str]: [description]
+    """
     return {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image"
+                  "/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "accept-encoding": "gzip, deflate, br",
         "accept-language": "en-GB,en;q=0.9,en-US;q=0.8,ml;q=0.7",
         "cache-control": "max-age=0",
@@ -54,14 +70,23 @@ def get_headers() -> Dict[str, str]:
         "sec-fetch-site": "none",
         "sec-fetch-user": "?1",
         "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/"
+                      "537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
         }
 
 
 def get_debt_shares(bal_url: str,
                     ticker: str,
                     ) -> Tuple[float, float, float, float]:
+    """[summary]
 
+    Args:
+        bal_url (str): [description]
+        ticker (str): [description]
+
+    Returns:
+        Tuple[float, float, float, float]: [description]
+    """
     r = requests.get(bal_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
         logging.error(f'Status code error:{r.status_code}\n{bal_url}\n')
@@ -73,7 +98,8 @@ def get_debt_shares(bal_url: str,
     # In the event of an error if a value is not assigned, a -1.0 value
     # is assigned.
     try:
-        shares_20 = float(soup.select('div section span')[-4].text.replace(',', '')) # 2020 shares
+        # 2020 shares
+        shares_20 = float(soup.select('div section span')[-4].text.replace(',', '')) 
     except Exception as err:
         logging.error(f'Scraping error: shares20\n {err}\n url: {bal_url}\n ticker: {ticker}')
     
@@ -102,7 +128,15 @@ def get_debt_shares(bal_url: str,
 def get_revenue_ebit(inc_url: str,
                      ticker: str,
                      ) -> Tuple[float, float, float, float]:
+    """[summary]
 
+    Args:
+        inc_url (str): [description]
+        ticker (str): [description]
+
+    Returns:
+        Tuple[float, float, float, float]: [description]
+    """
     r = requests.get(inc_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
         logging.error(f'Status code error:{r.status_code}\n{inc_url}\n')
@@ -148,6 +182,14 @@ def get_revenue_ebit(inc_url: str,
     
 
 def get_urls(ticker: str) -> Tuple[str, str, str]: 
+    """[summary]
+
+    Args:
+        ticker (str): [description]
+
+    Returns:
+        Tuple[str, str, str]: [description]
+    """
     # Historical price is sourced from here.
     hist_price_url = f'https://finance.yahoo.com/quote/{ticker}/history?period1=1478131200&period2=1609372800&interval=1mo&filter=history&frequency=1mo&includeAdjustedClose=true'
 
@@ -163,7 +205,15 @@ def get_urls(ticker: str) -> Tuple[str, str, str]:
 def get_hist_price(price_url: str,
                    ticker: str,
                    ) -> Tuple[float, float, float, float]:
-    
+    """[summary]
+
+    Args:
+        price_url (str): [description]
+        ticker (str): [description]
+
+    Returns:
+        Tuple[float, float, float, float]: [description]
+    """
     r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
     if r.status_code != 200: # 200 is successful request.
         logging.error(f'Status code error:{r.status_code}\n{price_url}\n')
@@ -205,6 +255,8 @@ def get_hist_price(price_url: str,
 
 
 def configure_logs() -> None:
+    """[summary]
+    """
     logging.basicConfig(
         filename = 'scraper.log',
         filemode = 'w',
@@ -219,6 +271,12 @@ def configure_logs() -> None:
 def generate_rand_delay(upper: int = 10,
                         lower: int = 4
                         ) -> None:
+    """[summary]
+
+    Args:
+        upper (int, optional): [description]. Defaults to 10.
+        lower (int, optional): [description]. Defaults to 4.
+    """
     time.sleep(random.randint(lower, upper))
 
 
