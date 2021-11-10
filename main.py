@@ -1,4 +1,8 @@
-"""Main scraper script to run"""
+"""Main script for this webscraper to get data from Yahoo Finance.
+
+Prints regular progress messages in standard output to update on the progress
+of the webscraper. Logs are stored in default file called scraper.log.
+"""
 
 
 import numpy as np
@@ -32,11 +36,20 @@ def main() -> None:
         price_url, bal_url, inc_url = functions.get_urls(ticker)
 
         # Getting the data for a ticker.
-        price20, price19, price18, price17 = functions.get_hist_price(price_url, ticker)
+        (price20,
+         price19,
+         price18,
+         price17) = functions.get_hist_price(price_url, ticker)
         functions.generate_rand_delay()
-        shares20, shares19, debt20, debt19 = functions.get_debt_shares(bal_url, ticker)
+        (shares20,
+         shares19,
+         debt20,
+         debt19) = functions.get_debt_shares(bal_url, ticker)
         functions.generate_rand_delay()
-        rev20, rev19, ebit20, ebit19 = functions.get_revenue_ebit(inc_url, ticker)
+        (rev20, 
+         rev19,
+         ebit20,
+         ebit19) = functions.get_revenue_ebit(inc_url, ticker)
         functions.generate_rand_delay()
 
         # Entering data into dataframe.
@@ -56,13 +69,13 @@ def main() -> None:
     # Export scraped data to Excel file.
 
     work_df.replace(to_replace = -1.0, value = np.nan)
-    _file_name: str = str(input('\nWhat filename to save as?'
-                          '\n1. Use a unique filename!'
-                          '\n2. Don\'t provide a file extension'
-                          '\nEnter here: '))
+    _file_name: str = str(input("\nWhat filename to save as?"
+                                "\n1. Use a unique filename!"
+                                "\n2. Don't provide a file extension"
+                                "\nEnter here: "))
     work_df.to_excel(f'{_file_name}.xlsx')
     print('Status: Data exported!\nAll done!')
 
 
 if __name__ == '__main__':
-    main()
+    pass

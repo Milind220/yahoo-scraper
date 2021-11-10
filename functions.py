@@ -1,4 +1,9 @@
-""""""
+"""Functions to be used in scraper for Hang Seng Index data from Yahoo Finance.
+
+The functions in this script are designed to be directly imported into the
+main script of this program, but can be used externally as well, with
+perhaps only minor tweaking.
+"""
 
 
 import logging
@@ -19,18 +24,40 @@ import requests
 # TODO: Improve logging
 
 
-def fix_ticker_formatting(filename: str,
-                          save_filename: str,
-                          column: str) -> None:
-    """[summary]
+def configure_logs(logfile_name: str = 'scraper.log') -> None:
+    """Configures settings for the script log.
 
     Args:
-        filename (str): [description]
-        save_filename (str): [description]
-        column (str): [description]
+        logfile_name (str, optional): Name of the log file. Defaults to
+            'scraper.log'.  
+    """
+    logging.basicConfig(
+        filename = logfile_name,
+        filemode = 'w',
+        format = '%(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        format = '%(asctime)s - %(message)s',
+        level = logging.ERROR)
+
+    print('\n\nStatus: Logs configured.\n')
+
+
+def fix_ticker_formatting(filename: str,
+                          save_filename: str,
+                          column: str = 'A') -> None:
+    """Fixes the formatting of the tickers to use in Yahoo Finance URLs.
+
+    Reads in an Excel file with the tickers in it, and saves formatted tickers
+    in a new Excel file.
+
+    Args:
+        filename (str): Name of Excel file with one column containing tickers.
+        save_filename (str): Name that output file should be given. 
+        column (str): index label for column that contains tickers. Defaults
+            to 'A'.
     """
     workbook = openpyxl.load_workbook(filename=filename)
-    ws = workbook.active # Opens the workbook.
+    ws = workbook.active
     col = ws[column]
 
     for cell in col:
@@ -52,12 +79,23 @@ def fix_ticker_formatting(filename: str,
     print('Status: Ticker formatting fixed.\n')
 
 
-def get_headers() -> Dict[str, str]:
-    """[summary]
+def generate_rand_delay(upper: int = 10,
+                        lower: int = 4
+                        ) -> None:
+    """Makes the scraper sleep for a random period of time.
 
-    Returns:
-        Dict[str, str]: [description]
+    Sleep time is randomly selected from a uniform distribution between 'lower'
+    and 'upper', including both end points.
+
+    Args:
+        upper (int, optional): Upper limit for sleep time. Defaults to 10.
+        lower (int, optional): Lower limit for sleep time. Defaults to 4.
     """
+    time.sleep(random.randint(lower, upper))
+
+
+def _get_headers() -> Dict[str, str]:
+    # Returns headers that allow you to scrape Yahoo finance.
     return {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image"
                   "/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -78,18 +116,26 @@ def get_headers() -> Dict[str, str]:
 def get_debt_shares(bal_url: str,
                     ticker: str,
                     ) -> Tuple[float, float, float, float]:
-    """[summary]
+    """Retrieves data on the total debt and no. of issued shares of company.
+
+    This data is retrieved for the years 2020 and 2019.
 
     Args:
-        bal_url (str): [description]
-        ticker (str): [description]
+        bal_url (str): URL for the Yahoo finance webpage of the balance sheet
+            of the company.
+        ticker (str): Official ticker of the company, as used on Yahoo finance.
 
     Returns:
-        Tuple[float, float, float, float]: [description]
+        Tuple[float, float, float, float]: Total shares in 2020, total shares
+            in 2019, total debt in 2020, total debt in 2019.
     """
-    r = requests.get(bal_url, verify=True, headers=get_headers(), timeout=30)
-    if r.status_code != 200: # 200 is successful request.
-        logging.error(f'Status code error:{r.status_code}\n{bal_url}\n')
+    r = requests.get(bal_url,
+                     verify=True,
+                     headers=_get_headers(),
+                     timeout=30)
+    # For an unsuccessful request.
+    if r.status_code != 200: 
+        logging.error(f'Status code error:{r.status_code}\n {bal_url}\n')
         return (-1.0, -1.0, -1.0, -1.0)
         
     soup = bs4.BeautifulSoup(r.text, 'lxml')
@@ -97,30 +143,44 @@ def get_debt_shares(bal_url: str,
     shares_20, shares_19, debt_20, debt_19 = -1.0, -1.0, -1.0, -1.0
     # In the event of an error if a value is not assigned, a -1.0 value
     # is assigned.
+
+    # 2020 shares.
     try:
-        # 2020 shares
+        
         shares_20 = float(soup.select('div section span')[-4].text.replace(',', '')) 
     except Exception as err:
-        logging.error(f'Scraping error: shares20\n {err}\n url: {bal_url}\n ticker: {ticker}')
-    
+        logging.error(f'Scraping error: shares20\n '
+                       '{err}\n '
+                       'url: {bal_url}\n '
+                       'ticker: {ticker}\n')
+    # 2019 shares.
     try:
-        shares_19 = float(soup.select('div section span')[-3].text.replace(',', '')) # 2019 shares
+        shares_19 = float(soup.select('div section span')[-3].text.replace(',', '')) 
     except Exception as err:
-        logging.error(f'Scraping error: shares19\n {err}\n url: {bal_url}\n ticker: {ticker}')
-    
+        logging.error(f'Scraping error: shares19\n '
+                       '{err}\n '
+                       'url: {bal_url}\n '
+                       'ticker: {ticker}\n')
+    # 2020 debt.
     try:
         for i,tag in enumerate(soup.select('div section span')):
             if tag.text == 'Total Debt':
                 debt_20 = float(soup.select('div section span')[i+1].text.replace(',', ''))
     except Exception as err:
-        logging.error(f'Scraping error: debt20\n {err}\n url: {bal_url}\n ticker: {ticker}')
-    
+        logging.error(f'Scraping error: debt20\n '
+                       '{err}\n '
+                       'url: {bal_url}\n '
+                       'ticker: {ticker}\n')
+    # 2019 debt.
     try:
         for i,tag in enumerate(soup.select('div section span')):
             if tag.text == 'Total Debt':
                 debt_19 = float(soup.select('div section span')[i+2].text.replace(',', ''))
     except Exception as err:
-        logging.error(f'Scraping error: debt19\n {err}\n url: {bal_url}\n ticker: {ticker}')
+        logging.error(f'Scraping error: debt19\n '
+                       '{err}\n '
+                       'url: {bal_url}\n '
+                       'ticker: {ticker}\n')
 
     return (shares_20, shares_19, debt_20, debt_19)
 
@@ -128,25 +188,33 @@ def get_debt_shares(bal_url: str,
 def get_revenue_ebit(inc_url: str,
                      ticker: str,
                      ) -> Tuple[float, float, float, float]:
-    """[summary]
+    """Retrieves data on total revenue and EBIT of company.
 
+    This data is retrieved for the years 2020 and 2019.
+    
     Args:
-        inc_url (str): [description]
-        ticker (str): [description]
+        inc_url (str): URL for the Yahoo finance webpage of the income
+            statement of the company.
+        ticker (str): Official ticker of the company, as used on Yahoo finance.
 
     Returns:
-        Tuple[float, float, float, float]: [description]
+        Tuple[float, float, float, float]: Revenue in 2020, revenue in 2019,
+            EBIT in 2020, EBIT in 2019.
     """
-    r = requests.get(inc_url, verify=True, headers=get_headers(), timeout=30)
-    if r.status_code != 200: # 200 is successful request.
-        logging.error(f'Status code error:{r.status_code}\n{inc_url}\n')
+    r = requests.get(inc_url,
+                     verify=True,
+                     headers=_get_headers(),
+                     timeout=30)
+    # For unsuccesful request.
+    if r.status_code != 200:
+        logging.error(f'Status code error:{r.status_code}\n {inc_url}\n')
         return (-1.0, -1.0, -1.0, -1.0)
     soup = bs4.BeautifulSoup(r.text, 'lxml')
 
-    # Gets a list of bs4 tags that have these elements in them, then uses list
-    # indexing to obtain the one that we need and then gets the text for it. 
-    # Removes commas, and the resulting number in str form is converted to a 
-    # float.
+    # Gets a list of bs4 tags that have these elements in them, then
+    # uses list indexing to obtain the one that we need and then gets
+    # the text for it. Removes commas, and the resulting number in str
+    # form is converted to a float.
     rev20, rev19, ebit20, ebit19 = -1.0, -1.0, -1.0, -1.0
     index = 0 
     for i,tag in enumerate(soup.select('div section span')):
@@ -156,39 +224,60 @@ def get_revenue_ebit(inc_url: str,
             offset20 = i - index
         if '2019' in tag.text:
             offset19 = i - index
-    
+
         if tag.text == 'Total Revenue':
+            # 2020 revenue.
             try:
                 rev20 = float(soup.select('div section span')[i+offset20].text.replace(',', ''))
             except Exception as err:
-                logging.error(f'Scraping error: rev20\n {err}\n url: {inc_url}\n ticker: {ticker}')
+                logging.error(f'Scraping error: rev20\n '
+                               '{err}\n '
+                               'url: {inc_url}\n '
+                               'ticker: {ticker}\n')
+            # 2019 revenue.
             try:
                 rev19 = float(soup.select('div section span')[i+offset19].text.replace(',', ''))
             except Exception as err:
-                logging.error(f'Scraping error: rev19\n {err}\n url: {inc_url}\n ticker: {ticker}')
-
+                logging.error(f'Scraping error: rev19\n '
+                               '{err}\n '
+                               'url: {inc_url}\n '
+                               'ticker: {ticker}\n')
+        
         if tag.text == 'EBIT':
+            # 2020 EBIT.
             try:
                 ebit20 = float(soup.select('div section span')[i+offset20].text.replace(',', ''))
             except Exception as err:
-                logging.error(f'Scraping error:  ebit20\n{err}\n url: {inc_url}\n ticker: {ticker}')
-
+                logging.error(f'Scraping error: ebit20\n '
+                               '{err}\n '
+                               'url: {inc_url}\n '
+                               'ticker: {ticker}\n')
+            # 2019 EBIT.
             try:
                 ebit19 = float(soup.select('div section span')[i+offset19].text.replace(',', ''))
             except Exception as err:
-                logging.error(f'Scraping error: ebit19\n{err}\n url: {inc_url}\n ticker: {ticker}')
+                logging.error(f'Scraping error: ebit19\n '
+                               '{err}\n '
+                               'url: {inc_url}\n '
+                               'ticker: {ticker}\n')
     
     return (rev20, rev19, ebit20, ebit19)
     
 
 def get_urls(ticker: str) -> Tuple[str, str, str]: 
-    """[summary]
+    """Generates the Yahoo finance URLs required in the rest of the scraper.
+    
+    Three Yahoo Finance URLs are generated, for the following webpages:
+        historical price webpage
+        balance sheet webpage
+        income statement webpage
 
     Args:
-        ticker (str): [description]
+        ticker (str): Official ticker of company as used on Yahoo Finance.
 
     Returns:
-        Tuple[str, str, str]: [description]
+        Tuple[str, str, str]: Historical price webpage URL, balance sheet
+            webpage URL, income statement webpage URL.
     """
     # Historical price is sourced from here.
     hist_price_url = f'https://finance.yahoo.com/quote/{ticker}/history?period1=1478131200&period2=1609372800&interval=1mo&filter=history&frequency=1mo&includeAdjustedClose=true'
@@ -205,79 +294,71 @@ def get_urls(ticker: str) -> Tuple[str, str, str]:
 def get_hist_price(price_url: str,
                    ticker: str,
                    ) -> Tuple[float, float, float, float]:
-    """[summary]
+    """Retrieves the historical price data for a company for 2017 to 2020.
+
+    The price data recorded is the final closing price for Dec of each year.
 
     Args:
-        price_url (str): [description]
-        ticker (str): [description]
+        price_url (str): Yahoo Finance URL for historical price webpage.
+        ticker (str): Official ticker of company as used on Yahoo Finance.
 
     Returns:
-        Tuple[float, float, float, float]: [description]
+        Tuple[float, float, float, float]: 2020 price, 2019 price, 2018 price,
+            2017 price.
     """
-    r = requests.get(price_url, verify=True, headers=get_headers(), timeout=30)
-    if r.status_code != 200: # 200 is successful request.
-        logging.error(f'Status code error:{r.status_code}\n{price_url}\n')
+    r = requests.get(price_url,
+                     verify=True,
+                     headers=_get_headers(),
+                     timeout=30)
+    # For unsuccessful request.
+    if r.status_code != 200:
+        logging.error(f'Status code error:{r.status_code}\n {price_url}\n')
         return (-1.0, -1.0, -1.0, -1.0)
 
     element_html = lxml.html.fromstring(r.content)
     table = element_html.xpath('//table')
     table_tree = lxml.etree.tostring(table[0], method='xml')
     data = pd.read_html(table_tree)[0]
-    data1 = data[pd.to_numeric(data['Open'], errors='coerce').notnull()] 
+    mask = pd.to_numeric(data['Open'], errors='coerce').notnull()
+    data1 = data[mask] 
     data1.set_axis(list(range(len(data1))), inplace=True)
 
-    # Gets a list of bs4 tags that have element td in them, and then selects 
-    # the one that that we need with list indexing, gets its text, and
-    # converts it to a float.
     price20, price19, price18, price17 = -1.0, -1.0, -1.0, -1.0
+    # 2020 price.
     try:
         price20 = float(data1.loc[0, 'Close*'])
 
     except Exception as err:
-        logging.error(f'Scraping error: price20\n {err}\n url: {price_url}\n ticker: {ticker}')
-
+        logging.error(f'Scraping error: price20\n '
+                       '{err}\n '
+                       'url: {price_url}\n '
+                       'ticker: {ticker}\n')
+    # 2019 price.
     try:
         price19 = float(data1.loc[12, 'Close*'])
     except Exception as err:
-        logging.error(f'Scraping error: price19\n {err}\n url: {price_url}\n ticker: {ticker}')
-
+        logging.error(f'Scraping error: price19\n '
+                       '{err}\n '
+                       'url: {price_url}\n '
+                       'ticker: {ticker}\n')
+    # 2018 price.
     try:
         price18 = float(data1.loc[24, 'Close*'])
     except Exception as err:
-        logging.error(f'Scraping error: price18\n {err}\n url: {price_url}\n ticker: {ticker}')
-    
+        logging.error(f'Scraping error: price18\n '
+                       '{err}\n '
+                       'url: {price_url}\n '
+                       'ticker: {ticker}\n')
+    # 2017 price.
     try:
         price17 = float(data1.loc[36, 'Close*'])
     except Exception as err:
-        logging.error(f'Scraping error: price17\n {err}\n url: {price_url}\n ticker: {ticker}')
+        logging.error(f'Scraping error: price17\n '
+                       '{err}\n '
+                       'url: {price_url}\n '
+                       'ticker: {ticker}\n')
 
     return (price20, price19, price18, price17)
-
-
-def configure_logs() -> None:
-    """[summary]
-    """
-    logging.basicConfig(
-        filename = 'scraper.log',
-        filemode = 'w',
-        format = '%(name)s - %(levelname)s - %(message)s')
-    logging.basicConfig(
-        format = '%(asctime)s - %(message)s',
-        level = logging.ERROR)
-
-    print('\n\nStatus: Logs configured.\n')
-
-
-def generate_rand_delay(upper: int = 10,
-                        lower: int = 4
-                        ) -> None:
-    """[summary]
-
-    Args:
-        upper (int, optional): [description]. Defaults to 10.
-        lower (int, optional): [description]. Defaults to 4.
-    """
-    time.sleep(random.randint(lower, upper))
 
 
 if __name__ == '__main__':
