@@ -1,3 +1,5 @@
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
 # Yahoo Finance Scraper for Hang Seng Index
 
 Created this webscraper to gather data for my group project for Energy and Environmental Economics, a course at my university (junior year).
