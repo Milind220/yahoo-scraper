@@ -8,6 +8,7 @@ perhaps only minor tweaking.
 
 import logging
 import random
+import sys
 import time
 from typing import Dict, Tuple
 
@@ -20,9 +21,8 @@ import pandas as pd
 import requests
 
 
-# TODO: Fix error messages in get_hist_price.
-# TODO: Improve logging
-
+# TODO: address error highlights in get_hist_price.
+# TODO: Add automatic currency conversion features.
 
 def configure_logs(logfile_name: str = 'scraper.log') -> None:
     """Configures settings for the script log.
@@ -33,10 +33,9 @@ def configure_logs(logfile_name: str = 'scraper.log') -> None:
     """
     logging.basicConfig(
         filename = logfile_name,
-        format = '%(name)s - %(levelname)s - %(message)s')
-    logging.basicConfig(
-        format = '%(asctime)s - %(message)s',
-        level = logging.ERROR)
+        filemode = 'w',
+        level = logging.ERROR,
+        format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     print('\n\nStatus: Logs configured.'
          f'\n\tLogs for this run can be found in {logfile_name}'
@@ -141,49 +140,40 @@ def get_debt_shares(bal_url: str,
         
     soup = bs4.BeautifulSoup(r.text, 'lxml')
 
-    shares_20, shares_19, debt_20, debt_19 = -1.0, -1.0, -1.0, -1.0
+    shares20, shares19, debt20, debt19 = -1.0, -1.0, -1.0, -1.0
     # In the event of an error if a value is not assigned, a -1.0 value
     # is assigned.
 
     # 2020 shares.
     try:
         
-        shares_20 = float(soup.select('div section span')[-4].text.replace(',', '')) 
+        shares20 = float(soup.select('div section span')[-4].text.replace(',', '')) 
     except Exception as err:
-        logging.error('Scraping error: shares20\n '
-                      f'{err}\n '
-                      f'url: {bal_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(bal_url, ticker, place='shares20')
+
     # 2019 shares.
     try:
-        shares_19 = float(soup.select('div section span')[-3].text.replace(',', '')) 
+        shares19 = float(soup.select('div section span')[-3].text.replace(',', '')) 
     except Exception as err:
-        logging.error('Scraping error: shares19\n '
-                      f'{err}\n '
-                      f'url: {bal_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(bal_url, ticker, place='shares19')
+
     # 2020 debt.
     try:
         for i,tag in enumerate(soup.select('div section span')):
             if tag.text == 'Total Debt':
-                debt_20 = float(soup.select('div section span')[i+1].text.replace(',', ''))
+                debt20 = float(soup.select('div section span')[i+1].text.replace(',', ''))
     except Exception as err:
-        logging.error('Scraping error: debt20\n '
-                      f'{err}\n '
-                      f'url: {bal_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(bal_url, ticker, place='debt20')
+
     # 2019 debt.
     try:
         for i,tag in enumerate(soup.select('div section span')):
             if tag.text == 'Total Debt':
-                debt_19 = float(soup.select('div section span')[i+2].text.replace(',', ''))
+                debt19 = float(soup.select('div section span')[i+2].text.replace(',', ''))
     except Exception as err:
-        logging.error('Scraping error: debt19\n '
-                      f'{err}\n '
-                      f'url: {bal_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(bal_url, ticker, place='debt19')
 
-    return (shares_20, shares_19, debt_20, debt_19)
+    return (shares20, shares19, debt20, debt19)
 
 
 def get_revenue_ebit(inc_url: str,
@@ -232,36 +222,26 @@ def get_revenue_ebit(inc_url: str,
             try:
                 rev20 = float(soup.select('div section span')[i+offset20].text.replace(',', ''))
             except Exception as err:
-                logging.error('Scraping error: rev20\n '
-                              f'{err}\n '
-                              f'url: {inc_url}\n '
-                              f'ticker: {ticker}\n')
+                _log_error(inc_url, ticker, place='rev20')
+
             # 2019 revenue.
             try:
                 rev19 = float(soup.select('div section span')[i+offset19].text.replace(',', ''))
             except Exception as err:
-                logging.error('Scraping error: rev19\n '
-                              f'{err}\n '
-                              f'url: {inc_url}\n '
-                              f'ticker: {ticker}\n')
+                _log_error(inc_url, ticker, place='rev19')
         
         if tag.text == 'EBIT':
             # 2020 EBIT.
             try:
                 ebit20 = float(soup.select('div section span')[i+offset20].text.replace(',', ''))
             except Exception as err:
-                logging.error('Scraping error: ebit20\n '
-                              f'{err}\n '
-                              f'url: {inc_url}\n '
-                              f'ticker: {ticker}\n')
+                _log_error(inc_url, ticker, place='ebit20')
+
             # 2019 EBIT.
             try:
                 ebit19 = float(soup.select('div section span')[i+offset19].text.replace(',', ''))
             except Exception as err:
-                logging.error('Scraping error: ebit19\n '
-                              f'{err}\n '
-                              f'url: {inc_url}\n '
-                              f'ticker: {ticker}\n')
+                _log_error(inc_url, ticker, place='ebit19')
     
     return (rev20, rev19, ebit20, ebit19)
     
@@ -331,36 +311,34 @@ def get_hist_price(price_url: str,
         price20 = float(data1.loc[0, 'Close*'])
 
     except Exception as err:
-        logging.error('Scraping error: price20\n '
-                      f'{err}\n '
-                      f'url: {price_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(price_url, ticker, place='price20')
+
     # 2019 price.
     try:
         price19 = float(data1.loc[12, 'Close*'])
     except Exception as err:
-        logging.error('Scraping error: price19\n '
-                      f'{err}\n '
-                      f'url: {price_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(price_url, ticker, place='price19')
+
     # 2018 price.
     try:
         price18 = float(data1.loc[24, 'Close*'])
     except Exception as err:
-        logging.error('Scraping error: price18\n '
-                      f'{err}\n '
-                      f'url: {price_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(price_url, ticker, place='price18')
+
     # 2017 price.
     try:
         price17 = float(data1.loc[36, 'Close*'])
     except Exception as err:
-        logging.error('Scraping error: price17\n '
-                      f'{err}\n '
-                      f'url: {price_url}\n '
-                      f'ticker: {ticker}\n')
+        _log_error(price_url, ticker, place='price17')
 
     return (price20, price19, price18, price17)
+
+
+def _log_error(url: str, ticker: str, place: str) -> None:
+    logging.error(f'Scraping error: {place}\n'
+                      f'\tError: {sys.exc_info()[0]}\n'
+                      f'\turl: {url}\n'
+                      f'\tticker: {ticker}\n')
 
 
 if __name__ == '__main__':
