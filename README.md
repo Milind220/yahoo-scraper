@@ -32,6 +32,13 @@ The webscraper carries out this task in 15-20 minutes. The scraping actually tak
 1. Clone into repo/download zip file
 2. Make an excel file with your own list of tickers (doesn't have to be hang seng index)
 
+https://user-images.githubusercontent.com/68847270/143286827-f5dee46f-bfdf-4abf-b062-3e7eff074aaf.mp4
+
+
+
+https://user-images.githubusercontent.com/68847270/143286994-325e6afa-716b-4f06-a9df-943caf7ef359.mp4
+
+
 OR
 
 Use the existing file
