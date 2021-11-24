@@ -26,7 +26,7 @@ def main() -> None:
 
     work_df = input_df.copy() # To avoid working with original df.
 
-    df_length = len(work_df)
+    df_length: int = len(work_df)
     print('Status: Starting webscrape.\n')
     for i in range(df_length):
         ticker: str = work_df['Ticker'][i]
@@ -40,17 +40,17 @@ def main() -> None:
          price19,
          price18,
          price17) = functions.get_hist_price(price_url, ticker)
-        functions.generate_rand_delay()
+        functions.generate_rand_delay(lower=0, upper=5)
         (shares20,
          shares19,
          debt20,
          debt19) = functions.get_debt_shares(bal_url, ticker)
-        functions.generate_rand_delay()
+        functions.generate_rand_delay(lower=0, upper=5)
         (rev20, 
          rev19,
          ebit20,
          ebit19) = functions.get_revenue_ebit(inc_url, ticker)
-        functions.generate_rand_delay()
+        functions.generate_rand_delay(lower=0, upper=5)
 
         # Entering data into dataframe.
         work_df.loc[i, 'Price 2020'] = price20
