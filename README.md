@@ -6,6 +6,10 @@ Created this webscraper to gather data for my group project for Energy and Envir
 
 My group selected ESG Investing as our broad scope topic, and focused on carbon intensity metrics - methods of quantifying the carbon footprint of a company relative to its growth and earnings. We hypothesised that with the rise in popularity of ESG investing, a company with a consistently smaller carbon footprint after normalisation, would see better stock returns in the long term. We specifically examined two popular metrics, WACI and Relative Carbon Intensity, and compared how closely they correlated with the revenue of and stock returns for different companies. 
 
+
+See the complete report [here](https://drive.google.com/file/d/1E1_e2-tj2sVu8TeKWkZwwci-5KXb3Ixv/view?usp=sharing)
+
+
 ### Data Scraping
 
 My main task here was to get data for all 60 components of the Hang Seng Index, which ended up being 840 total data points, and would require visiting 180 different webpages. I decided to write a Python webscraper using the Requests, BeautifulSoup and lxml libraries, which would retrieve the data from Yahoo Finance. This would also be scalable in case we decided to expand our dataset for the study.
