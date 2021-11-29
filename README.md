@@ -37,7 +37,7 @@ The webscraper carries out this task in 15-20 minutes. The scraping actually tak
 2. Make an excel file with your own list of tickers (doesn't have to be hang seng index)
 
 
-![Untitled design-2](https://user-images.githubusercontent.com/68847270/143290160-d5da9321-f894-40a8-ba45-d59d0903e777.gif)
+![saving](https://user-images.githubusercontent.com/68847270/143801259-bdb9a322-ee5b-43d2-a563-ebecf601f0f5.gif)
 
 
 ![Untitled design](https://user-images.githubusercontent.com/68847270/143290613-e89a0d29-594f-49a0-b2ce-94320654f8a7.gif)
