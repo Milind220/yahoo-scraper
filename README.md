@@ -38,10 +38,12 @@ The webscraper carries out this task in 15-20 minutes. The scraping actually tak
 3. Ensure that you have bs4, requests, lxml, numpy, pandas, openpyxl all installed.
 4. Run main.py (Should give you updates on scraping progress in terminal).
 
-Scraping in action:
+*Scraping in action:*
+
 ![scraping](https://user-images.githubusercontent.com/68847270/143801651-02da1b2f-e9df-4e33-9e8d-aaea5e79596c.gif)
 
 
-Saving the scraped data:
+*Saving the scraped data:*
+
 ![saving](https://user-images.githubusercontent.com/68847270/143801378-6ccb96fc-5a01-4575-819a-f0102d32ba31.gif)
 
