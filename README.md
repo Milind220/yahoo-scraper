@@ -34,18 +34,8 @@ The webscraper carries out this task in 15-20 minutes. The scraping actually tak
 ### To run
 
 1. Clone into repo/download zip file
-2. Make an excel file with your own list of tickers (doesn't have to be hang seng index)
-
-
-![saving](https://user-images.githubusercontent.com/68847270/143801259-bdb9a322-ee5b-43d2-a563-ebecf601f0f5.gif)
-
-
-![Untitled design](https://user-images.githubusercontent.com/68847270/143290613-e89a0d29-594f-49a0-b2ce-94320654f8a7.gif)
-
-OR
-
-Use the existing file
-
+2. Make an excel file with your own list of tickers (doesn't have to be hang seng index) OR Use the existing file
 3. Ensure that you have bs4, requests, lxml, numpy, pandas, openpyxl all installed.
 4. Run main.py (Should give you updates on scraping progress in terminal).
 
+![saving](https://user-images.githubusercontent.com/68847270/143801378-6ccb96fc-5a01-4575-819a-f0102d32ba31.gif)
