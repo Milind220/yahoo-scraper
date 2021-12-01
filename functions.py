@@ -129,13 +129,13 @@ def get_debt_shares(bal_url: str,
     try:
         
         shares20 = float(soup.select('div section span')[-4].text.replace(',', '')) 
-    except Exception as err:
+    except Exception:
         _log_error(bal_url, ticker, place='shares20')
 
     # 2019 shares.
     try:
         shares19 = float(soup.select('div section span')[-3].text.replace(',', '')) 
-    except Exception as err:
+    except Exception:
         _log_error(bal_url, ticker, place='shares19')
 
     # 2020 debt.
@@ -143,7 +143,7 @@ def get_debt_shares(bal_url: str,
         for i,tag in enumerate(soup.select('div section span')):
             if tag.text == 'Total Debt':
                 debt20 = float(soup.select('div section span')[i+1].text.replace(',', ''))
-    except Exception as err:
+    except Exception:
         _log_error(bal_url, ticker, place='debt20')
 
     # 2019 debt.
@@ -151,7 +151,7 @@ def get_debt_shares(bal_url: str,
         for i,tag in enumerate(soup.select('div section span')):
             if tag.text == 'Total Debt':
                 debt19 = float(soup.select('div section span')[i+2].text.replace(',', ''))
-    except Exception as err:
+    except Exception:
         _log_error(bal_url, ticker, place='debt19')
 
     return (shares20, shares19, debt20, debt19)
@@ -202,26 +202,26 @@ def get_revenue_ebit(inc_url: str,
             # 2020 revenue.
             try:
                 rev20 = float(soup.select('div section span')[i+offset20].text.replace(',', ''))
-            except Exception as err:
+            except Exception:
                 _log_error(inc_url, ticker, place='rev20')
 
             # 2019 revenue.
             try:
                 rev19 = float(soup.select('div section span')[i+offset19].text.replace(',', ''))
-            except Exception as err:
+            except Exception:
                 _log_error(inc_url, ticker, place='rev19')
         
         if tag.text == 'EBIT':
             # 2020 EBIT.
             try:
                 ebit20 = float(soup.select('div section span')[i+offset20].text.replace(',', ''))
-            except Exception as err:
+            except Exception:
                 _log_error(inc_url, ticker, place='ebit20')
 
             # 2019 EBIT.
             try:
                 ebit19 = float(soup.select('div section span')[i+offset19].text.replace(',', ''))
-            except Exception as err:
+            except Exception:
                 _log_error(inc_url, ticker, place='ebit19')
     
     return (rev20, rev19, ebit20, ebit19)
@@ -291,25 +291,25 @@ def get_hist_price(price_url: str,
     try:
         price20 = float(data1.loc[0, 'Close*'])
 
-    except Exception as err:
+    except Exception:
         _log_error(price_url, ticker, place='price20')
 
     # 2019 price.
     try:
         price19 = float(data1.loc[12, 'Close*'])
-    except Exception as err:
+    except Exception:
         _log_error(price_url, ticker, place='price19')
 
     # 2018 price.
     try:
         price18 = float(data1.loc[24, 'Close*'])
-    except Exception as err:
+    except Exception:
         _log_error(price_url, ticker, place='price18')
 
     # 2017 price.
     try:
         price17 = float(data1.loc[36, 'Close*'])
-    except Exception as err:
+    except Exception:
         _log_error(price_url, ticker, place='price17')
 
     return (price20, price19, price18, price17)
