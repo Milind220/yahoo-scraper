@@ -8,9 +8,9 @@ Created this webscraper to gather data for my group project for Energy and Envir
 
 * ##### [Project Context & Background Info](#context-&-background-info)
 * ##### [Data Scraping](#data-scraping)
-*     ###### [Target Data](#target-data)
+*   ###### [Target Data](#target-data)
 * ##### [Code](#code)
-*     ###### [To Run](#to-run)
+*   ###### [To Run](#to-run)
 
 ## Project Context & Background Information
 
