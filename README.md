@@ -4,16 +4,12 @@
 
 Created this webscraper to gather data for my group project for Energy and Environmental Economics, a course at my university (junior year).
 
-#### Table Of Contents
+### Table Of Contents
 
 [Project Context & Background Info](#context-&-background-info)
-
 [Data Scraping](#data-scraping)
-
 * [Target Data](#target-data)
-
 [Code](#code)
-
 * [To Run](#to-run)
 
 ## Project Context & Background Information
