@@ -7,8 +7,10 @@ Created this webscraper to gather data for my group project for Energy and Envir
 ### Table Of Contents
 
 [Project Context & Background Info](#context-&-background-info)
+
 [Data Scraping](#data-scraping)
 * [Target Data](#target-data)
+
 [Code](#code)
 * [To Run](#to-run)
 
