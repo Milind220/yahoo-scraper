@@ -24,7 +24,6 @@ def main() -> None:
 
     data_file: str = "ready_input_data.xlsx"  # Formatted table.
     input_df = pd.read_excel(data_file)
-
     work_df = input_df.copy()  # To avoid working with original df.
 
     df_length: int = len(work_df)
@@ -37,15 +36,11 @@ def main() -> None:
         price_url, bal_url, inc_url = functions.get_urls(ticker)
 
         # Getting the data for a ticker.
-        (price20, price19, price18, price17) = functions.get_hist_price(
-            price_url, ticker
-        )
+        price20, price19, price18, price17 = functions.get_hist_price(price_url, ticker)
         functions.generate_rand_delay(lower=0, upper=5)
-        (shares20, shares19, debt20, debt19) = functions.get_debt_shares(
-            bal_url, ticker
-        )
+        shares20, shares19, debt20, debt19 = functions.get_debt_shares(bal_url, ticker)
         functions.generate_rand_delay(lower=0, upper=5)
-        (rev20, rev19, ebit20, ebit19) = functions.get_revenue_ebit(inc_url, ticker)
+        rev20, rev19, ebit20, ebit19 = functions.get_revenue_ebit(inc_url, ticker)
         functions.generate_rand_delay(lower=0, upper=5)
 
         # Entering data into dataframe.

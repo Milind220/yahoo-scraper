@@ -45,7 +45,9 @@ def configure_logs(logfile_name: str = "scraper.log") -> None:
     )
 
 
-def fix_ticker_formatting(filename: str, save_filename: str, column: str = "A") -> None:
+def fix_ticker_formatting(
+    filename: str, save_filename: str, column: str = "A",
+) -> None:
     """Fixes the formatting of the tickers to use in Yahoo Finance URLs.
 
     Reads in an Excel file with the tickers in it, and saves formatted tickers
@@ -111,7 +113,8 @@ def get_debt_shares(
         Tuple[float, float, float, float]: Total shares in 2020, total shares
             in 2019, total debt in 2020, total debt in 2019.
     """
-    r = requests.get(bal_url, verify=True, headers=_get_headers(), timeout=30,)
+    r = requests.get(bal_url, verify=True, headers=_get_headers(), timeout=30)
+
     # For an unsuccessful request.
     if r.status_code != 200:
         logging.error(f"Status code error:{r.status_code}\n {bal_url}\n")
@@ -159,7 +162,7 @@ def get_debt_shares(
     return (shares20, shares19, debt20, debt19)
 
 
-def get_revenue_ebit(inc_url: str, ticker: str,) -> Tuple[float, float, float, float]:
+def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, float]:
     """Retrieves data on total revenue and EBIT of company.
 
     This data is retrieved for the years 2020 and 2019.
@@ -259,7 +262,7 @@ def get_urls(ticker: str) -> Tuple[str, str, str]:
     return (hist_price_url, bal_sheet_url, inc_stmt_url)
 
 
-def get_hist_price(price_url: str, ticker: str,) -> Tuple[float, float, float, float]:
+def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float, float, float]:
     """Retrieves the historical price data for a company for 2017 to 2020.
 
     The price data recorded is the final closing price for Dec of each year.
@@ -283,6 +286,7 @@ def get_hist_price(price_url: str, ticker: str,) -> Tuple[float, float, float, f
     table_tree = lxml.etree.tostring(table[0], method="xml")
     data = pd.read_html(table_tree)[0]
     mask = pd.to_numeric(data["Open"], errors="coerce").notnull()
+
     data1 = data[mask]
     data1.set_axis(list(range(len(data1))), inplace=True)
 
