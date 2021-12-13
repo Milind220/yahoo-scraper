@@ -28,6 +28,7 @@ def main() -> None:
 
     df_length: int = len(work_df)
     print("Status: Starting webscrape.\n")
+
     for i in range(df_length):
         ticker: str = work_df["Ticker"][i]
         print(f"\tStatus: # {i+1}/{df_length} Currently scraping data: {ticker}\n")

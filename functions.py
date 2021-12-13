@@ -37,7 +37,6 @@ def configure_logs(logfile_name: str = "scraper.log") -> None:
         level=logging.ERROR,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-
     print(
         "\n\nStatus: Logs configured."
         f"\n\tLogs for this run can be found in {logfile_name}"
@@ -95,11 +94,7 @@ def generate_rand_delay(upper: int = 10, lower: int = 4) -> None:
     time.sleep(random.randint(lower, upper))
 
 
-def get_debt_shares(
-    bal_url: str, ticker: str,
-) -> Tuple[
-    float, float, float, float,
-]:
+def get_debt_shares(bal_url: str, ticker: str) -> Tuple[float, float, float, float]:
     """Retrieves data on the total debt and no. of issued shares of company.
 
     This data is retrieved for the years 2020 and 2019.
@@ -206,7 +201,6 @@ def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, fl
                 )
             except Exception:
                 _log_error(inc_url, ticker, place="rev20")
-
             # 2019 revenue.
             try:
                 rev19 = float(
@@ -214,7 +208,6 @@ def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, fl
                 )
             except Exception:
                 _log_error(inc_url, ticker, place="rev19")
-
         if tag.text == "EBIT":
             # 2020 EBIT.
             try:
@@ -223,7 +216,6 @@ def get_revenue_ebit(inc_url: str, ticker: str) -> Tuple[float, float, float, fl
                 )
             except Exception:
                 _log_error(inc_url, ticker, place="ebit20")
-
             # 2019 EBIT.
             try:
                 ebit19 = float(
@@ -294,7 +286,6 @@ def get_hist_price(price_url: str, ticker: str) -> Tuple[float, float, float, fl
     # 2020 price.
     try:
         price20 = float(data1.loc[0, "Close*"])
-
     except Exception:
         _log_error(price_url, ticker, place="price20")
 
